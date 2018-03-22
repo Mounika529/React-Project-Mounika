@@ -1,0 +1,132 @@
+
+This is pure react application, developed a functionality using CRUD operation for a employee details, which makes you to add a functionality as well as 
+Read, update and delete a record.
+
+
+class App extends React.Component {
+  constructor(props) {
+    super(props);
+    this.onAdd = this.onAdd.bind(this);
+    this.handleChange = this.handleChange.bind(this);
+    this.onSave = this.onSave.bind(this);
+    this.onDelete =this.onDelete.bind(this);
+    this.onCancel = this.onCancel.bind(this);
+    this.onEdit = this.onEdit.bind(this);
+    
+    this.state = {
+      show: false,
+      listItems: [],
+      editItemIndex: -1,
+      field: {
+        id:'name',
+        value: '',
+        label: 'Name',
+        field: {...this.field}
+      },
+    };
+    
+    this.field = {
+        id:'name',
+        value: '',
+        label: 'Name',
+      }
+  }
+  
+  onSave() {
+      const item = {[this.state.field.id] : this.state.field.value};
+    	if(this.state.editItemIndex === -1) {
+        this.setState({
+          show:false,
+          listItems: [...this.state.listItems,item],
+          field : {...this.field}
+        })
+      } else {
+          let items = [...this.state.listItems];
+          items.splice(this.state.editItemIndex,1,item);
+          this.setState({
+          field:{...this.field},
+          show: false,
+          listItems:[...items]});
+      }
+  }
+  
+  handleChange(e) {
+    this.setState({field:{...this.state.field, value:e.target.value}})
+  }
+  
+  onAdd() {
+    this.setState({show: true, editItemIndex: -1 })
+  }
+  
+  onDelete(itemIndex) {
+      let items = [...this.state.listItems];
+      items.splice(itemIndex,1);
+    	this.setState({listItems:[...items]});
+  }
+  
+  onCancel() {
+    this.setState({show:false, field:{...this.field}});
+  }
+  
+  onEdit(item,itemIndex) {
+      this.setState({
+        show:true, 
+        editItemIndex: itemIndex, 
+        field:{...this.field, value:item[this.field.id]}
+      });
+      
+  }
+  render() {
+    return (
+      <div>
+        <button onClick={this.onAdd}>Add</button>
+        { this.state.show ? 
+        <Form field = {this.state.field} 
+        onSave={this.onSave} 
+        handleChange = {this.handleChange} onCancel={this.onCancel}/> : '' }
+        <List onDelete={this.onDelete} onEdit={this.onEdit} listItems={this.state.listItems}/>
+      </div>
+      
+      
+    );
+  }
+}
+ 
+ const Form = (props) => {
+      
+     return (
+         <div>
+         <label>{props.field.label}</label>
+         <input type="text" value={props.field.value} id={props.field.id} 
+         onChange={props.handleChange}></input>
+         <button onClick={props.onCancel}>cancel</button>
+         <button onClick={props.onSave}>save</button>
+         </div>
+      )
+ }
+ Form.propTypes = {
+       field: PropTypes.shape({
+            label: PropTypes.string,
+            id: PropTypes.string,
+            value: PropTypes.string,    
+       })
+ }
+const List = (props) => {
+   return (
+      <div>
+      <ul>
+       {props.listItems.map((item,index) => (
+       <li key={index}>
+           <span>{item.name}</span>
+           <button onClick={() => props.onEdit(item,index)}>edit</button>
+           <button onClick={() => props.onDelete(index)}>delete</button>
+        </li>
+       )
+      )}
+       </ul>
+      </div>
+     )
+}
+
+
+ReactDOM.render(<App/>, mountNode);
